@@ -1,366 +1,523 @@
 ---
-name: literature-review-for-research
-description: Applies cognitive science frameworks for creative thinking to CS and AI research ideation. Use when seeking genuinely novel research directions by leveraging combinatorial creativity, analogical reasoning, constraint manipulation, and other empirically grounded creative strategies.
-version: 1.0.0
-author: Orchestra Research
-license: MIT
-tags: [Creative Thinking, Research Ideation, Analogical Reasoning, Problem Reformulation, Cognitive Science]
-dependencies: []
+name: literature-survey
+description: >
+  Use this skill whenever the user asks for a literature review, related work section, research survey,
+  or paper lineage on any ML/CV/AI topic. Trigger on phrases like "do a literature review of X",
+  "what are the papers after X", "related work on Y", "survey of Z papers", "what came after paper X",
+  "lineage of X research", "how has X evolved". Also trigger when the user uploads or describes a paper
+  and asks what followed from it, or asks for a chronological figure of a research area.
+  This skill produces: (1) a thorough web-searched paper catalog organized chronologically with per-paper
+  summaries, (2) extracted research trends, and (3) an interactive multi-track lineage diagram with
+  hover tooltips. Always use this skill for related work requests — even partial ones like "add more papers
+  on topic X to the existing survey".
 ---
 
-# Creative Thinking for Research
+# Literature Survey + Lineage Diagram
 
-Eight empirically grounded frameworks from cognitive science, applied to computer science and AI research. Unlike ad-hoc brainstorming, each framework here is backed by decades of creativity research — from Koestler's bisociation to Kauffman's adjacent possible. They target distinct cognitive operations: combining, reformulating, analogizing, constraining, inverting, abstracting, exploring boundaries, and holding contradictions.
-
-## When to Use This Skill
-
-- Generating genuinely novel ideas, not incremental extensions of prior work
-- Feeling trapped in a local optimum of thinking within a single subfield
-- Wanting to systematically apply creativity heuristics rather than waiting for inspiration
-- Preparing for a research retreat or PhD-level ideation session
-- Bridging between fields and seeking structural (not superficial) connections
-
-**Do NOT use this skill when**:
-- You need structured project-level brainstorming workflows (use `brainstorming-research-ideas`)
-- You have a well-defined problem and need execution help (use domain-specific skills)
-- You need a literature survey (use `scientific-skills:literature-review`)
-
-**Relationship to Brainstorm skill**: The brainstorm skill provides operational workflows (diverge → converge → refine) and practical filters. This skill provides the deeper cognitive engines that power creative leaps. Use them together: creative-thinking to generate raw insight, brainstorm to structure and evaluate it.
+A skill for producing comprehensive, searchable literature surveys on ML/AI/CV research topics,
+paired with an interactive chronological lineage diagram that visualizes paper relationships across
+research tracks.
 
 ---
 
-## Framework 1: Combinatorial Creativity (Bisociation)
+## Overview
 
-Novel ideas arise from combining existing concepts in unexpected ways. Arthur Koestler called this **bisociation** — connecting two previously unrelated frames of reference, as distinct from routine association within a single frame.
+This skill executes a three-phase pipeline:
 
-**Why it works**: Meta-research consistently shows that breadth of knowledge is a precursor to creative output. People who read across disciplines produce more novel work. The combination itself is the creative act.
+1. **Search** — systematic multi-query web search covering arXiv, Semantic Scholar, and venue proceedings
+2. **Catalog** — chronological per-paper summaries organized into research tracks with trend extraction
+3. **Visualize** — interactive multi-track HTML lineage diagram with hover tooltips and cross-track influence lines
 
-**In CS Research**:
-- Biological evolution → optimization (genetic algorithms)
-- Game theory → networking (mechanism design for routing)
-- Statistical physics → machine learning (Boltzmann machines, energy-based models)
-- Linguistics → programming (type theory, formal grammars)
-
-**Systematic Bisociation Workflow**:
-
-1. **Select two domains** you have at least passing familiarity with
-2. **List core primitives** in each domain (5-10 fundamental concepts per domain)
-3. **Create a cross-product matrix**: row = concepts from Domain A, column = concepts from Domain B
-4. **For each cell**, ask: "What would it mean to apply A's concept to B's problem?"
-5. **Filter**: Which combinations produce a non-trivial, testable research question?
-6. **Validate structural depth**: Is the connection mechanistic or merely metaphorical?
-
-**Cross-Product Example**:
-
-| | Caching | Load Balancing | Fault Tolerance |
-|---|---------|---------------|-----------------|
-| **Natural Selection** | Evict least-fit entries | Adaptive allocation via fitness | Population-level redundancy |
-| **Immune Memory** | Learned threat signatures | Distributed detection | Self/non-self discrimination |
-| **Symbiosis** | Cooperative prefetching | Mutualistic resource sharing | Co-dependent resilience |
-
-**Quality Test**: A strong bisociation is not a surface metaphor ("the network is like a brain") but a structural mapping where the mechanism transfers ("attention mechanisms implement a form of selective gating analogous to cognitive attention filtering").
-
-**Self-Check**:
-- [ ] Is the connection structural (mechanisms map) or merely verbal (labels map)?
-- [ ] Does the combination generate testable predictions?
-- [ ] Would an expert in both fields find the connection non-obvious but sound?
+The output is a written survey artifact plus an inline interactive diagram. The diagram is the primary
+deliverable for visual communication; the written survey is the primary deliverable for reference.
 
 ---
 
-## Framework 2: Problem Reformulation (Representational Change)
+## Phase 1: Search Strategy
 
-Gestalt psychologists identified that breakthroughs often come not from solving the problem as stated, but from **re-representing the problem itself**. Kaplan and Simon's work on insight shows that changing the problem space — the constraints, the abstraction level, the formalism — is often where creativity lives.
+### Step 1 — Anchor paper identification
 
-**The Key Shift**: From "How do I solve this problem?" to "Am I even thinking about this problem correctly?"
+Before searching, identify the anchor paper(s):
+- Extract title, authors, venue, date, arXiv ID
+- Note the paper's core contribution in one sentence (this seeds search queries)
+- Identify the 2–3 most-cited predecessors (these become "context precursors" in the diagram)
 
-**Reformulation Strategies**:
+### Step 2 — Multi-angle search queries
 
-| Strategy | Example |
-|----------|---------|
-| **Change the objective** | "Make the algorithm faster" → "Eliminate the need for this computation" |
-| **Change the formalism** | Graph problem → linear algebra problem (spectral methods) |
-| **Change the granularity** | Per-token prediction → per-span prediction |
-| **Change the agent** | "How should the model learn?" → "How should the data teach?" (curriculum learning) |
-| **Change the timescale** | Real-time optimization → amortized inference |
-| **Invert the direction** | Forward simulation → inverse problem (learning from observations) |
+Run **at least 6 distinct web searches** covering different angles. Do not rely on a single broad query.
+Use `web_search` and `web_fetch` for full paper pages.
 
-**Workflow**:
+Required query types:
+```
+1. Direct follow-up: "<paper title> follow-up extensions 2024 2025"
+2. Method name: "<core method name> improvements arXiv"
+3. Application domain: "<method> applied to <domain> 2025"
+4. Venue scan: "<topic> CVPR ICCV NeurIPS ICML 2025 2026"
+5. Competitor methods: "<paper> vs <competing approach> comparison"
+6. Theoretical: "<method> theory analysis convergence 2025"
+```
 
-1. State your current problem in one sentence
-2. Identify the **hidden assumptions** in that statement:
-   - What formalism are you using? (Could you use a different one?)
-   - What is the objective? (Is it the right objective?)
-   - What level of granularity? (Could you go coarser or finer?)
-   - Who is the agent? (Could you shift perspective?)
-3. For each assumption, **generate the alternative**: "What if [opposite assumption]?"
-4. For each alternative, ask: "Does this reformulation make the problem easier, harder, or different in a useful way?"
-5. A reformulation that makes a hard problem easy is often a publishable insight on its own
+For 3D vision / video topics, add:
+```
+7. "<method> 3D reconstruction video generation"
+8. "<method> streaming online long-context video"
+9. "test-time <domain> arXiv 2025 2026"
+```
 
-**Classic CS Examples**:
-- **PageRank**: Reformulated "find important web pages" from content analysis to graph eigenvalue problem
-- **Dropout**: Reformulated "prevent overfitting" from regularization to approximate ensemble
-- **Attention**: Reformulated "handle long sequences" from remembering everything to selectively querying
+### Step 3 — Per-paper data extraction
 
----
+For each paper found, record:
+- Full title, authors (first + et al.), venue or arXiv ID, month/year
+- One-sentence core contribution
+- Specific improvement over the anchor paper (what limitation does it address?)
+- Whether it is a **key paper** (shifts field direction) or incremental
+- Whether it is a **context precursor** (foundation model the method was applied to, not a TTT/method paper itself)
 
-## Framework 3: Analogical Reasoning (Structure-Mapping)
+### Step 4 — Scope boundaries
 
-Dedre Gentner's **structure-mapping theory** and Kevin Dunbar's studies of real scientists show that analogy is the core engine of scientific creativity. The critical finding: surface-level analogies are common but weak; **structural or relational analogies** — where the deep causal/relational structure maps across domains — produce the most powerful insights.
+**Include:**
+- Direct extensions and variants of the method
+- Papers that apply the method to a new domain
+- Theoretical analyses of the method
+- Papers that compete with or unify the method
+- Concurrent work from the same time period
 
-**Dunbar's Finding**: In the most successful labs, analogies from distant domains drove the most important discoveries. Nearby analogies refined ideas; distant analogies generated them.
-
-**Levels of Analogical Depth**:
-
-| Level | Description | Value | Example |
-|-------|-------------|-------|---------|
-| **Surface** | Things look similar | Low | "A neural network is like a brain" |
-| **Relational** | Relationships between entities match | Medium | "Attention allocation in models parallels resource allocation in economics" |
-| **Structural** | Deep causal mechanisms map | High | "Diffusion models reverse a thermodynamic process; the math of non-equilibrium stat-mech directly applies" |
-
-**Structure-Mapping Workflow**:
-
-1. **Describe your problem** using only relational/causal language (strip domain-specific nouns)
-   - Bad: "We need to improve transformer attention efficiency"
-   - Good: "We have a system that must selectively aggregate information from a large set, where relevance is context-dependent and the cost scales quadratically with set size"
-2. **Search for structural matches**: What other systems selectively aggregate from large sets?
-   - Database query optimization, visual attention in neuroscience, information retrieval, resource allocation
-3. **Pick the most distant match** with genuine structural fidelity
-4. **Map the solution mechanism**: How does the source domain solve this?
-5. **Transfer and adapt**: What changes when you bring that mechanism into your domain?
-6. **Generate predictions**: The analogy should tell you something you didn't already know
-
-**Validation Checklist**:
-- [ ] Does the mapping preserve causal/relational structure (not just labels)?
-- [ ] Can I identify at least one prediction the analogy makes in my domain?
-- [ ] Would an expert in the source domain confirm the mechanism is correctly understood?
-- [ ] Is the analogy non-obvious to my target audience?
+**Exclude:**
+- Papers that merely cite the anchor without building on it
+- General surveys that mention the method in passing
+- Papers outside the requested scope (e.g., if asked for 3D vision only, exclude pure NLP)
 
 ---
 
-## Framework 4: Constraint Manipulation (Boden's Framework)
+## Phase 2: Catalog and Written Survey
 
-Margaret Boden's framework distinguishes three forms of creativity based on how they interact with constraints:
+### Structure
 
-| Type | Operation | CS Example |
-|------|-----------|------------|
-| **Exploratory** | Search within the existing conceptual space | Hyperparameter tuning, architecture search within a fixed paradigm |
-| **Combinational** | Combine elements from different spaces | Multi-task learning, neuro-symbolic methods |
-| **Transformational** | Change the rules of the space itself | Dropping the assumption that training requires labels (self-supervised learning) |
+Organize the written survey with this structure:
 
-**Transformational creativity is the rarest and highest-impact.** It happens when you change what is even considered a valid solution.
+```markdown
+# [Topic] Literature Survey
 
-**Constraint Analysis Workflow**:
+## Foundational context and concurrent work
+[2–3 paragraphs: the intellectual lineage leading to the anchor paper,
+ concurrent work from the same month/year]
 
-1. **List the constraints** of your current approach (5-10 constraints):
-   - Computational: "Must fit in GPU memory"
-   - Methodological: "Requires labeled data"
-   - Architectural: "Uses fixed-length context"
-   - Evaluative: "Measured by accuracy on benchmark X"
-2. **Classify each constraint**:
-   - **Hard**: Physically or logically necessary (cannot violate)
-   - **Soft**: Convention or historical accident (can question)
-   - **Hidden**: Not stated but implicitly assumed (most fertile for innovation)
-3. **For each soft/hidden constraint**, ask:
-   - What if we relaxed it? (streaming algorithms from relaxing "fits in memory")
-   - What if we tightened it? (efficiency research from tightening compute budgets)
-   - What if we replaced it with a different constraint entirely?
-4. **The most productive move** is often exposing and dropping a hidden constraint
+## Chronological catalog of follow-up papers
 
-**Classic Examples of Constraint Transformation**:
-- "Data must fit in memory" → dropped → streaming algorithms, external memory
-- "Training requires human labels" → dropped → self-supervised learning
-- "Models must be deterministic" → dropped → variational methods, diffusion
-- "Inference must happen in one pass" → dropped → iterative refinement, chain-of-thought
+### [Year] [Quarter]: [Descriptive subtitle]
+**[Paper Title]** — [Authors], arXiv [ID] / [Venue], [Month Year].
+[2–4 sentences: what it does, what it improves, key result if available]
 
----
+[repeat for each paper in this period]
 
-## Framework 5: Negation and Inversion
+## [N] Major trends shaping [topic] research
 
-Take a core assumption in your field and negate it. This is formalized in De Bono's lateral thinking and the **TRIZ methodology** from engineering.
+**Trend 1: [Name]** — [2–3 sentences]
+[repeat for each trend]
 
-**The Pattern**: "What if [widely held assumption] is wrong, unnecessary, or invertible?"
+## Notable research forks
+[Describe 2–4 forks: e.g., "language vs vision", "efficiency vs expressiveness",
+ "Group A vs Group B", "memorization vs reasoning"]
 
-**Systematic Negation Workflow**:
+## Conclusion
+[2–3 sentences synthesizing trajectory]
+```
 
-1. **List 5-10 core assumptions** in your subfield (the things "everyone knows")
-2. **Negate each one** and ask: What system would you build?
-3. **Evaluate each negation**:
-   - Incoherent → discard
-   - Already explored → check if conditions have changed (see brainstorm skill, Framework 5)
-   - Unexplored and coherent → potential research direction
+### Trend identification criteria
 
-**Negation Hall of Fame in CS**:
+A "major trend" must satisfy all three:
+1. At least 3 papers independently pursue it
+2. It represents a deliberate response to a specific limitation of the anchor paper
+3. It has a clear direction (not just "people are using X more")
 
-| Assumption | Negation | Result |
-|-----------|----------|--------|
-| "We need strong consistency" | What if we don't? | Eventual consistency, CRDTs |
-| "We need exact answers" | What if approximate is fine? | Sketches, LSH, approximate nearest neighbors |
-| "Labels are necessary" | What if we learn without them? | Self-supervised learning, contrastive methods |
-| "More parameters = more compute" | What if we don't use all parameters? | Mixture of Experts, sparse models |
-| "Training and inference are separate" | What if the model keeps learning? | Online learning, test-time training |
-| "Errors must be prevented" | What if we embrace and correct them? | Speculative decoding, self-correction |
-
-**TRIZ-Inspired Principles for CS**:
-
-| TRIZ Principle | CS Application |
-|---------------|----------------|
-| **Inversion** | Reverse the process (generative vs. discriminative) |
-| **Segmentation** | Break monolithic into modular (microservices, mixture of experts) |
-| **Merging** | Combine separate steps (end-to-end learning) |
-| **Universality** | One component serves multiple functions (multi-task models) |
-| **Nesting** | Place one system inside another (meta-learning) |
-| **Dynamization** | Make static things adaptive (dynamic architectures, adaptive computation) |
+Good trend names are action-oriented: "The inner loop is getting richer", "Hardware efficiency is no
+longer a bottleneck", "3D vision is the breakout application domain".
 
 ---
 
-## Framework 6: Abstraction and Generalization Laddering
+## Phase 3: Interactive Lineage Diagram
 
-Moving up and down the abstraction ladder is a fundamental creative act. Polya's heuristics formalize this: *"Can you solve a more general problem? A more specific one? An analogous one?"*
+### Track assignment
 
-**Three Moves**:
+Assign each paper to exactly one track. Tracks should represent **research communities or problem
+framings**, not just topics. Good track names: "Core Architecture", "Google Memory", "Theory &
+Unification", "Video Generation", "3D Reconstruction", "Domain Adaptation".
 
-| Move | Question | Outcome |
-|------|----------|---------|
-| **Generalize** | "Is my solution a special case of something broader?" | Framework papers, unifying theories |
-| **Specialize** | "What happens when I add extreme constraints?" | Niche applications, surprising edge cases |
-| **Analogize** | "Where else does this abstract pattern appear?" | Cross-domain transfer (see Framework 3) |
+Rules:
+- 4–6 tracks maximum (more = unreadable at 960px width)
+- Each track has a distinct color from the palette: purple, teal, amber, blue, coral, gray
+- Context precursors get dashed borders within their track
+- Key papers get double-stroke borders
 
-**Generalization Workflow**:
-1. State your specific result
-2. Replace each specific element with a variable: "ResNet works for ImageNet" → "Architecture X works for distribution Y"
-3. Ask: Under what conditions does this hold? What is the general principle?
-4. If the general principle is novel → that is the contribution
+### Diagram HTML template
 
-**Specialization Workflow**:
-1. Take a general method
-2. Add extreme constraints: tiny data, huge dimensionality, adversarial inputs, real-time requirements
-3. Ask: Does the method still work? If not, why not?
-4. The failure case often reveals the method's true assumptions
+Use the following HTML widget structure. The key design decisions are:
 
-**When to Generalize vs. Specialize**:
-- Generalize when you have results but no explanation
-- Specialize when you have theory but no grounding
-- Analogize when you are stuck in either direction
+1. **Container width**: 960px with horizontal scroll wrapper — allows 6 tracks at 149px each
+2. **Node layout**: absolute positioned divs, not SVG text — allows proper CSS theming
+3. **SVG overlay**: used only for connectors and shaded era bands, not for nodes
+4. **Hover tooltips**: inline JS, positioned to avoid viewport overflow
+5. **Down edges**: solid lines within a track (sequential development)
+6. **Cross edges**: dashed bezier curves between tracks (influence/inspiration)
+7. **Era bands**: shaded `<rect>` elements grouping papers by time period
+8. **Context zone**: separate shaded rect highlighting precursor papers
+
+```html
+<style>
+/* Scroll wrapper — allows 6-track diagram to extend past widget width */
+.ttw{overflow-x:auto;width:100%}
+.ttc{position:relative;width:960px;font-family:var(--font-sans)}
+
+/* Column headers */
+.tthdr{display:flex;margin-left:64px;gap:2px;height:48px;margin-bottom:6px}
+.ttth{flex:0 0 146px;font-size:10px;font-weight:500;text-align:center;
+      border-radius:6px;border:1px solid;display:flex;align-items:center;
+      justify-content:center;padding:4px;line-height:1.3}
+
+/* Main body — height is calculated from tallest track's last node y + NH + 60 */
+.ttbody{position:relative;height:TOTAL_HEIGHT_PX}
+.ttsvg{position:absolute;top:0;left:0;width:960px;height:TOTAL_HEIGHT_PX;pointer-events:none}
+
+/* Paper nodes */
+.ttn{position:absolute;width:134px;border-radius:6px;border:1px solid;
+     padding:4px 6px;box-sizing:border-box;cursor:default;
+     transition:transform .12s;z-index:2}
+.ttn.key{border-width:2px}      /* key paper */
+.ttn.ctx{border-style:dashed;opacity:0.72}  /* context precursor */
+.ttn:hover{transform:scale(1.07);z-index:50}
+.tnt{font-size:10.5px;font-weight:500;line-height:1.35}
+.tns{font-size:9.5px;line-height:1.2;margin-top:1px;opacity:0.68}
+
+/* Date labels (left margin) */
+.ttdl{position:absolute;left:2px;font-size:9px;font-weight:500;
+      color:var(--color-text-tertiary)}
+
+/* Hover tooltip */
+.tttip{display:none;position:absolute;z-index:200;
+       background:var(--color-background-primary);
+       border:0.5px solid var(--color-border-secondary);
+       border-radius:8px;padding:8px 10px;font-size:10px;
+       max-width:186px;line-height:1.5;color:var(--color-text-secondary);
+       pointer-events:none}
+
+/* Color classes — light/dark mode via CSS variables */
+.tc0{background:#EEEDFE;border-color:#534AB7;color:#3C3489}  /* purple */
+.tc1{background:#E1F5EE;border-color:#0F6E56;color:#085041}  /* teal */
+.tc2{background:#FAEEDA;border-color:#854F0B;color:#633806}  /* amber */
+.tc3{background:#E6F1FB;border-color:#185FA5;color:#0C447C}  /* blue */
+.tc4{background:#FAECE7;border-color:#993C1D;color:#712B13}  /* coral */
+.tc5{background:#F1EFE8;border-color:#5F5E5A;color:#444441}  /* gray */
+@media(prefers-color-scheme:dark){
+.tc0{background:#26215C;border-color:#AFA9EC;color:#CECBF6}
+.tc1{background:#04342C;border-color:#5DCAA5;color:#9FE1CB}
+.tc2{background:#412402;border-color:#EF9F27;color:#FAC775}
+.tc3{background:#042C53;border-color:#85B7EB;color:#B5D4F4}
+.tc4{background:#4A1B0C;border-color:#F0997B;color:#F5C4B3}
+.tc5{background:#2C2C2A;border-color:#B4B2A9;color:#D3D1C7}
+}
+</style>
+
+<div class="ttw">
+<div class="ttc">
+  <!-- Legend row -->
+  <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;...">
+    <!-- Color swatches per track -->
+    <!-- double-border = key paper, dashed = context precursor -->
+  </div>
+
+  <!-- Column headers -->
+  <div class="tthdr">
+    <div class="ttth tc0">Track 0 Name</div>
+    <!-- repeat for each track -->
+  </div>
+
+  <!-- Main diagram body -->
+  <div class="ttbody" id="ttbody">
+    <svg class="ttsvg" id="ttsvg"></svg>  <!-- connectors only -->
+    <div class="tttip" id="tttip"></div>  <!-- hover tooltip -->
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+  /* ── Layout constants ── */
+  const L=64;     // left margin (date labels)
+  const TW=149;   // track width (column pitch)
+  const NW=134;   // node width
+  const NH=42;    // node height
+
+  /* Track color values for SVG strokes (match tc* CSS) */
+  const TC=['#7F77DD','#1D9E75','#BA7517','#378ADD','#D85A30','#888780'];
+
+  /* Helper: x center of track t */
+  const tx = t => L + t*TW + TW/2;
+  /* Helper: x left edge of node in track t */
+  const nx = t => L + t*TW + 7;
+
+  /* ── Paper data ──
+     Each entry: {
+       id:    unique string key
+       t:     track index (0–5)
+       y:     top pixel position
+       title: short display name (≤20 chars)
+       sub:   "Author et al. Mon 'YY"
+       key:   true = double border
+       ctx:   true = dashed border (context precursor)
+       desc:  tooltip full description
+     }
+  */
+  const papers = [
+    // Example — replace with actual papers:
+    {id:'anchor', t:0, y:70,  title:'Anchor Paper',    sub:"Author et al. '24", key:true,  ctx:false, desc:'The paper being surveyed. Describe its core contribution here.'},
+    {id:'ext1',   t:0, y:130, title:'Extension 1',     sub:"Author et al. '24", key:false, ctx:false, desc:'First direct extension. What it improves.'},
+    {id:'pre1',   t:2, y:48,  title:'Precursor Model', sub:"Author et al. '23", key:false, ctx:true,  desc:'CONTEXT: Foundation model the anchor was applied to. Not a follow-up paper itself.'},
+  ];
+
+  /* ── Down edges (sequential within a track) ──
+     [parentId, childId] — must share the same track t
+  */
+  const downEdges = [
+    ['anchor','ext1'],
+    // ...
+  ];
+
+  /* ── Cross edges (influence between tracks) ──
+     {f: sourceId, t: targetId}
+     Rendered as dashed bezier curves
+  */
+  const crossEdges = [
+    {f:'anchor', t:'pre1'},
+    // ...
+  ];
+
+  /* ── Date labels (left margin) ──
+     {label: string, y: pixel y where the date line sits}
+  */
+  const dates = [
+    {label:"Jul '24", y:88},
+    // ...
+  ];
+
+  /* ── Build lookup map ── */
+  const pmap = {};
+  papers.forEach(p => pmap[p.id] = p);
+
+  const body  = document.getElementById('ttbody');
+  const svgEl = document.getElementById('ttsvg');
+  const tip   = document.getElementById('tttip');
+
+  /* Arrow marker */
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = `<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 2L8 5L2 8" fill="none" stroke="context-stroke"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>`;
+  svgEl.appendChild(defs);
+
+  /* Era band shading — add one rect per period grouping */
+  [[238, 328], [410, 560]].forEach(([y1, y2]) => {
+    const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x', 0); r.setAttribute('y', y1);
+    r.setAttribute('width', 960); r.setAttribute('height', y2 - y1);
+    r.setAttribute('fill', 'var(--color-background-secondary)');
+    r.setAttribute('opacity', '0.45');
+    svgEl.appendChild(r);
+  });
+
+  /* Optional context zone — shaded rect behind precursor papers */
+  // const ctxBand = document.createElementNS(...); // add if needed
+
+  /* Date labels */
+  dates.forEach(({label, y}) => {
+    const d = document.createElement('div');
+    d.className = 'ttdl';
+    d.style.top = (y - 8) + 'px';
+    d.textContent = label;
+    body.appendChild(d);
+  });
+
+  /* Down edges */
+  downEdges.forEach(([fid, tid]) => {
+    const fp = pmap[fid], tp = pmap[tid];
+    if (!fp || !tp || fp.t !== tp.t) return;
+    const x = tx(fp.t);
+    const y1 = fp.y + NH, y2 = tp.y;
+    if (y2 <= y1) return;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', x); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', TC[fp.t]);
+    line.setAttribute('stroke-width', '1');
+    line.setAttribute('stroke-opacity', fp.ctx ? '0.35' : '0.5');
+    if (fp.ctx) line.setAttribute('stroke-dasharray','3 3');
+    line.setAttribute('marker-end','url(#arr)');
+    svgEl.appendChild(line);
+  });
+
+  /* Cross edges (dashed bezier) */
+  crossEdges.forEach(({f: fid, t: tid}) => {
+    const fp = pmap[fid], tp = pmap[tid];
+    if (!fp || !tp) return;
+    const x1 = tx(fp.t), y1 = fp.y + NH/2;
+    const x2 = tx(tp.t), y2 = tp.y + NH/2;
+    const midY = (y1 + y2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}`);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', TC[fp.t]);
+    path.setAttribute('stroke-width','0.9');
+    path.setAttribute('stroke-opacity','0.35');
+    path.setAttribute('stroke-dasharray','4 3');
+    path.setAttribute('marker-end','url(#arr)');
+    svgEl.appendChild(path);
+  });
+
+  /* Paper nodes */
+  papers.forEach(p => {
+    const el = document.createElement('div');
+    el.className = `ttn tc${p.t}${p.key ? ' key' : ''}${p.ctx ? ' ctx' : ''}`;
+    el.style.left = nx(p.t) + 'px';
+    el.style.top  = p.y + 'px';
+    el.innerHTML  = `<div class="tnt">${p.title}</div>
+                     <div class="tns">${p.sub}</div>`;
+
+    el.addEventListener('mouseenter', () => {
+      tip.innerHTML = `
+        <div style="font-weight:500;font-size:11px;margin-bottom:3px;
+                    color:var(--color-text-primary)">${p.title}</div>
+        <div style="color:var(--color-text-tertiary);font-size:9.5px;
+                    margin-bottom:4px">${p.sub}</div>
+        <div>${p.desc}</div>`;
+      tip.style.display = 'block';
+      // Flip tooltip to left for rightmost tracks
+      let tipLeft = nx(p.t) + NW + 5;
+      if (p.t >= 4) tipLeft = nx(p.t) - 192;
+      if (tipLeft < 2) tipLeft = 2;
+      tip.style.left = tipLeft + 'px';
+      tip.style.top  = Math.max(0, p.y - 5) + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    body.appendChild(el);
+  });
+})();
+</script>
+```
+
+### Diagram layout rules
+
+**Vertical positioning (y values):**
+- Anchor paper: y = 70
+- Each subsequent paper in a track: y += 58–80 (more spacing when years are far apart)
+- Papers from the same month across different tracks should have the same y
+- Context precursors start at y = 48 and stack up before the anchor paper y level
+
+**Era band placement:**
+- One band per major time cluster (e.g., Nov–Dec 2024, Apr–Jun 2025)
+- Each band spans y1 to y2 covering all papers in that period
+- Use `var(--color-background-secondary)` at opacity 0.45
+
+**Total diagram height:**
+- Find the paper with the highest y value: `max_y = max(p.y for all p) + NH + 60`
+- Set `height:max_y` in `.ttbody` and `height:max_y` in `.ttsvg`
+
+**Track count vs width:**
+- 4 tracks → TW = 180, total width = 784px (fits without scroll)
+- 5 tracks → TW = 160, total width = 864px (fits without scroll)
+- 6 tracks → TW = 149, total width = 958px (needs scroll wrapper at 960px)
+- 7+ tracks → split into two diagrams or merge related tracks
+
+**Tooltip side:**
+- Tracks 0–3: tooltip appears to the right of the node (`tipLeft = nx(p.t) + NW + 5`)
+- Tracks 4–5: tooltip appears to the left of the node (`tipLeft = nx(p.t) - 192`)
 
 ---
 
-## Framework 7: The Adjacent Possible (Kauffman / Johnson)
+## Workflow Checklist
 
-Stuart Kauffman's concept, popularized by Steven Johnson: innovation happens at the boundary of what is currently reachable — the **adjacent possible**. New ideas become thinkable once their prerequisites exist. This explains why simultaneous independent discovery is so common — multiple people reach the same boundary.
+Use this checklist when executing the skill:
 
-**Practical Implication**: Map what has recently become possible and explore the space those enablers open.
-
-**Adjacent Possible Mapping Workflow**:
-
-1. **List recent enablers** (last 1-3 years):
-   - New hardware capabilities (longer context, faster inference, new accelerators)
-   - New datasets or benchmarks
-   - New open-source tools or frameworks
-   - New theoretical results
-   - New regulatory or social conditions
-2. **For each enabler, ask**: "What was previously impossible or impractical that this now permits?"
-3. **Combine enablers**: The most powerful adjacent possibles arise from the intersection of multiple new enablers
-4. **Check for competition**: If many people can see the same adjacent possible, speed or a unique angle matters
-
-**Current Adjacent Possibles (2025-2026)**:
-
-| Enabler | Newly Possible |
-|---------|---------------|
-| 1M+ token context windows | Full-codebase reasoning, book-length analysis |
-| Inference cost drops (100x in 2 years) | Real-time agentic loops, always-on AI assistants |
-| Open-weight models at GPT-4 level | Reproducible research on frontier capabilities |
-| Multimodal models (vision + language + audio) | Unified perception-reasoning systems |
-| Synthetic data at scale | Training data for domains with no natural data |
-| Tool-using models | Research automation, self-improving systems |
-
-**Timing Signal**: If your idea requires technology that doesn't exist yet, it's beyond the adjacent possible — park it. If your idea could have been done 5 years ago, someone probably did — check the literature. The sweet spot is ideas that became feasible in the last 6-18 months.
+```
+[ ] 1. Identify anchor paper(s) and their core contribution
+[ ] 2. Run ≥6 distinct web searches (see query types above)
+[ ] 3. For 3D/video topics: add 3 extra domain-specific queries
+[ ] 4. Collect papers: title, authors, venue, date, contribution, key/ctx flag
+[ ] 5. Assign each paper to a track (4–6 tracks, named by research community)
+[ ] 6. Identify 3–5 major trends (≥3 papers each, clear direction)
+[ ] 7. Identify 2–4 notable research forks
+[ ] 8. Write chronological catalog (see written survey structure)
+[ ] 9. Calculate y positions for all nodes (no overlaps within a track)
+[ ] 10. Calculate total diagram height
+[ ] 11. Build down edges list (sequential within track)
+[ ] 12. Build cross edges list (influence between tracks)
+[ ] 13. Place date labels at correct y positions
+[ ] 14. Add era bands for major time groupings
+[ ] 15. Add context zone highlight if precursor papers exist
+[ ] 16. Verify tooltip flip logic for rightmost tracks
+[ ] 17. Deliver written survey artifact + interactive diagram
+```
 
 ---
 
-## Framework 8: Janusian and Dialectical Thinking
+## Domain-Specific Guidance
 
-Albert Rothenberg's studies of eminent creators found that **holding two contradictory ideas simultaneously** is a hallmark of creative thinking. Named after Janus, the two-faced Roman god, this mode of thinking doesn't resolve contradictions by choosing a side — it generates new frameworks that transcend the opposition.
+### For 3D Vision / Reconstruction papers
 
-**In CS**: The most influential results often emerge from tensions previously thought irreconcilable.
+Always include a "foundation models" context zone at the top of the 3D track:
+- These are the offline/quadratic models the TTT-style paper improves on (e.g., DUSt3R, VGGT, CUT3R)
+- Mark them `ctx:true` (dashed borders)
+- Add a labeled shaded rect: `'foundation models (precursors)'`
+- Connect them with dashed down edges
 
-| Contradiction | Resolution | Impact |
-|--------------|------------|--------|
-| Consistency AND Availability (distributed systems) | CAP theorem: formalized the trade-off, then Raft/CRDTs found practical middle grounds | Foundation of distributed systems theory |
-| Security AND Usability | Zero-knowledge proofs: prove knowledge without revealing it | Enabled private computation |
-| Expressiveness AND Tractability | Probabilistic programming: express complex models, automate inference | New programming paradigm |
-| Memorization AND Generalization | Grokking: models memorize first, then generalize with more training | New understanding of learning dynamics |
-| Compression AND Quality | Neural codecs that compress beyond information-theoretic limits via learned priors | Redefined compression research |
+Recommended tracks for 3D/video papers:
+- Track 0: Core architecture (the method itself and direct extensions)
+- Track 1: Memory/scaling (Google-style memory systems)
+- Track 2: Theory (unification frameworks)
+- Track 3: Video generation (diffusion-based video)
+- Track 4: 3D reconstruction (feed-forward 3D, streaming recon)
+- Track 5: Adaptation / downstream apps
 
-**Dialectical Thinking Workflow**:
+### For NLP / LLM papers
 
-1. **Identify a binary** in your field: A vs. B (two approaches, goals, or paradigms treated as opposites)
-2. **Resist choosing a side**. Instead ask:
-   - "What would a system look like that achieves both A and B?"
-   - "Under what conditions is the A-B trade-off not fundamental?"
-   - "Is the opposition an artifact of how we formalized the problem?"
-3. **Seek synthesis**: The resolution often requires a new abstraction that reframes the relationship
-4. **Test the synthesis**: Can you demonstrate empirically that both goals are achievable?
+Recommended tracks:
+- Track 0: Core architecture
+- Track 1: Efficiency / hardware
+- Track 2: Theory
+- Track 3: Reasoning / benchmarks
+- Track 4: Domain adaptation
+- Track 5: Multimodal applications
 
-**Self-Check**:
-- [ ] Am I holding the contradiction genuinely (not prematurely resolving it)?
-- [ ] Is the synthesis a new idea, not just a compromise (splitting the difference)?
-- [ ] Does the resolution change how people think about the problem, not just the solution?
+### For robotics / embodied AI papers
 
----
-
-## Combining Frameworks: A Creative Thinking Protocol
-
-These frameworks are most powerful in combination. Here is a systematic protocol for a deep creative thinking session:
-
-### Phase 1: Map the Space (15 min)
-1. **Constraint Manipulation** (F4): List all constraints of the current paradigm. Mark which are hard, soft, hidden.
-2. **Adjacent Possible** (F7): List recent enablers that change the feasibility landscape.
-
-### Phase 2: Generate Disruptions (30 min)
-3. **Negation** (F5): Negate 3 soft/hidden constraints. What systems emerge?
-4. **Bisociation** (F1): Pick a distant field and create a cross-product matrix with your domain.
-5. **Problem Reformulation** (F2): Restate your problem 3 different ways (change objective, formalism, agent).
-
-### Phase 3: Deepen Promising Leads (30 min)
-6. **Analogical Reasoning** (F3): For each promising idea, find a structural analogy and extract predictions.
-7. **Abstraction Laddering** (F6): Move each idea up (generalize) and down (specialize).
-8. **Janusian Thinking** (F8): Identify any tensions. Can you synthesize rather than choose?
-
-### Phase 4: Evaluate (15 min)
-Apply the two-sentence test (from the brainstorm skill):
-> "**[Domain] currently struggles with [problem] because [reason].** We [approach] by [mechanism], which works because [insight]."
-
-Any idea that survives all four phases and passes the two-sentence test is worth pursuing.
+Recommended tracks:
+- Track 0: Core method
+- Track 1: Sim-to-real / deployment
+- Track 2: Theory / analysis
+- Track 3: Manipulation
+- Track 4: Navigation / locomotion
+- Track 5: Perception / sensing
 
 ---
 
-## Common Creative Blocks and Unblocking Strategies
+## Quality Standards
 
-| Block | Symptom | Framework to Apply |
-|-------|---------|-------------------|
-| **Fixation** | Cannot stop thinking about the problem one way | Problem Reformulation (F2) — force a different representation |
-| **Tunnel vision** | All ideas come from the same subfield | Bisociation (F1) or Analogical Reasoning (F3) — import from elsewhere |
-| **Self-censoring** | Dismissing ideas as "too weird" before exploring | Negation (F5) — weird is the point; evaluate after generating |
-| **Incrementalism** | Every idea is "+2% on benchmark X" | Constraint Manipulation (F4) — change the rules, not the parameters |
-| **Analysis paralysis** | Too many options, cannot commit | Adjacent Possible (F7) — what is feasible right now? |
-| **False dichotomy** | Stuck choosing between two approaches | Janusian Thinking (F8) — seek synthesis, not selection |
+**Written survey:**
+- Every paper gets a unique one-sentence contribution statement — no two should say the same thing
+- Dates must be consistent with arXiv submission dates, not acceptance dates
+- Trend names must be action-oriented verbs, not just noun phrases
+- Forks must describe two genuine competing directions, not just subfields
 
----
+**Diagram:**
+- No two nodes in the same track should have overlapping y ranges (min 58px gap)
+- All cross edges must be bezier curves — no straight diagonal lines
+- Solid down edges = sequential development; dashed down edges = loose influence within context zone
+- Dashed bezier = cross-track influence; solid bezier = cross-track strong dependency
+- Dark mode must be tested: all text must be readable on dark backgrounds via CSS variables
+- Tooltips must not overflow the widget boundary (flip logic for tracks ≥4)
 
-## Usage Instructions for Agents
-
-When a researcher asks for help with creative thinking or novel ideation:
-
-1. **Assess the block**: What kind of thinking are they stuck in? (See Common Creative Blocks table)
-2. **Select 2-3 frameworks** based on the block type
-3. **Walk through each framework interactively**, asking the researcher to supply domain-specific content
-4. **Push for structural depth**: If an analogy or combination is surface-level, probe deeper
-5. **Maintain a running list** of all generated ideas, even unusual ones
-6. **Apply the two-sentence test** to candidates that survive exploration
-7. **Hand off to the brainstorm skill** for systematic evaluation (diverge → converge → refine)
-
-**Key Principles**:
-- Generative mode first, evaluative mode second — do not filter prematurely
-- Distant analogies are more valuable than nearby ones, but require more validation
-- The researcher's domain expertise is essential — the agent provides the cognitive scaffolding, not the domain knowledge
-- Encourage the researcher to sit with contradictions rather than resolve them quickly
+**Completeness check before delivering:**
+- Does the anchor paper appear as a node? (It always should)
+- Are all papers mentioned in the written survey present in the diagram?
+- Are cross-track influence arrows consistent with the written trends?
+- Is the timeline (y positions) monotonically increasing with date?
