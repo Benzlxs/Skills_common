@@ -6,3 +6,5 @@ My daily used agent SKILLS
 [AI research skills](https://github.com/Orchestra-Research/AI-Research-SKILLs/tree/main)
 
 [Claude scientific skills](https://github.com/K-Dense-AI/claude-scientific-skills)
+
+[Gstack](https://github.com/garrytan/gstack)
