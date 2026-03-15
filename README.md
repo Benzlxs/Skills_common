@@ -10,3 +10,5 @@ My daily used agent SKILLS
 [Gstack](https://github.com/garrytan/gstack)
 
 [AutoResearch-cloud-code](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep/tree/main)
+
+[CLI-Anything](https://github.com/HKUDS/CLI-Anything/tree/main)
