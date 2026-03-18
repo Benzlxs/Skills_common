@@ -2,7 +2,7 @@
 My daily used agent SKILLS
 
 
-#### Other git repos
+#### Other skill repos
 [AI-research-skills](https://github.com/Orchestra-Research/AI-Research-SKILLs/tree/main)
 
 [Claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills)
@@ -12,3 +12,10 @@ My daily used agent SKILLS
 [AutoResearch-cloud-code](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep/tree/main)
 
 [CLI-Anything](https://github.com/HKUDS/CLI-Anything/tree/main)
+
+
+#### Autoresearch repos
+[AutoResearch-Claw](https://github.com/aiming-lab/AutoResearchClaw)
+[AutoResearch](https://github.com/karpathy/autoresearch)
+[AutoResearch-Claudcode](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep)
+[AutoResearch-Sibyl](https://github.com/Sibyl-Research-Team/sibyl-research-system)
