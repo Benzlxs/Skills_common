@@ -15,6 +15,8 @@ My daily used SKILL and agents
 
 [Mattpocock skills](https://github.com/mattpocock/skills)
 
+[Front-end skills](https://github.com/zarazhangrui/frontend-slides)
+
 
 ## Autoresearch repos
 [AutoResearch-Claw](https://github.com/aiming-lab/AutoResearchClaw)
