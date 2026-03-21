@@ -28,3 +28,5 @@ My daily used SKILL and agents
 [AutoResearch-Sibyl](https://github.com/Sibyl-Research-Team/sibyl-research-system)
 
 [ClawTeam](https://github.com/HKUDS/ClawTeam)
+
+[FARS](https://analemma.ai/blog/introducing-fars/)
