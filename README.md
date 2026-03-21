@@ -30,3 +30,5 @@ My daily used SKILL and agents
 [ClawTeam](https://github.com/HKUDS/ClawTeam)
 
 [FARS](https://analemma.ai/blog/introducing-fars/)
+
+[AI Researcher](https://github.com/HKUDS/AI-Researcher)
