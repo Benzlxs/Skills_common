@@ -32,3 +32,5 @@ My daily used SKILL and agents
 [FARS](https://analemma.ai/blog/introducing-fars/)
 
 [AI Researcher](https://github.com/HKUDS/AI-Researcher)
+
+[GPT Researcher](https://github.com/assafelovic/gpt-researcher)
