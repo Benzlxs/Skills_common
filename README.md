@@ -23,6 +23,8 @@ My daily used SKILL and agents
 
 [AutoResearch](https://github.com/karpathy/autoresearch)
 
+[EvoScientist](https://github.com/EvoScientist/EvoScientist)
+
 [AutoResearch-Claudcode](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep)
 
 [AutoResearch-Sibyl](https://github.com/Sibyl-Research-Team/sibyl-research-system)
