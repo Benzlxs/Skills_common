@@ -36,3 +36,5 @@ My daily used SKILL and agents
 [AI Researcher](https://github.com/HKUDS/AI-Researcher)
 
 [GPT Researcher](https://github.com/assafelovic/gpt-researcher)
+
+[AI-scientist-v2](https://github.com/sakanaai/ai-scientist-v2)
