@@ -17,6 +17,8 @@ My daily used SKILL and agents
 
 [Front-end skills](https://github.com/zarazhangrui/frontend-slides)
 
+[Deepmind-research-skills](https://github.com/google-deepmind/science-skills)
+
 
 ## Autoresearch repos
 [AutoResearch-Claw](https://github.com/aiming-lab/AutoResearchClaw)
